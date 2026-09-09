@@ -1,0 +1,62 @@
+version: "2"
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+    - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus-storage:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      sui-net:
+        ipv4_address: 172.18.0.4
+    restart: always
+    user: root
+
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    ports:
+    - "3000:3000"
+    environment:
+      - "GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource"
+      - "GF_SECURITY_ALLOW_EMBEDDING=true"
+    volumes:
+    - ./grafana-storage:/var/lib/grafana
+    networks:
+      sui-net:
+        ipv4_address: 172.18.0.3
+    restart: always
+    depends_on:
+     - prometheus
+    user: root
+
+  fullnode:
+    image: sui-fullnode:latest
+    ports:
+    - "58000:8000"
+    - "58004:8004/udp"
+    - "58080:8080"
+    - "59000:9000"
+    - "59184:9184"
+    networks:
+      sui-net:
+        ipv4_address: 172.18.0.2
+    volumes:
+    - ./config/fullnode.yaml:/opt/sui/config/fullnode.yaml:ro
+    - ./config/genesis.blob:/opt/sui/config/genesis.blob:ro
+    - ./db:/opt/sui/db:rw
+    command: ["/opt/sui/bin/sui-node", "--config-path", "/opt/sui/config/fullnode.yaml"]
+    restart: always
+    depends_on:
+     - grafana
+
+networks:
+  sui-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1

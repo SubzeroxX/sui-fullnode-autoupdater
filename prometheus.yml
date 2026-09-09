@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s # How often to scrape targets
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Job to scrape your Sui Fullnode metrics
+  - job_name: 'sui_fullnode'
+    # IMPORTANT: Replace 'sui_fullnode_host' with the actual IP/hostname of your Sui node
+    # If the Sui node is running on the same host and you are using 'host' network mode
+    # for the Sui node, you might use 'host.docker.internal' (Docker Desktop) or the host's IP.
+    # If the Sui node is running in its own Docker container, you'll need its container name
+    # or a service name if part of this compose file. For simplicity assuming it's accessible.
+    static_configs:
+      - targets: ['172.18.0.2:9184'] # e.g., '192.168.1.5:9184'
