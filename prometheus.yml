@@ -12,3 +12,5 @@ scrape_configs:
     # or a service name if part of this compose file. For simplicity assuming it's accessible.
     static_configs:
       - targets: ['172.18.0.2:9184'] # e.g., '192.168.1.5:9184'
+        labels:
+        chain: 'mainnet'
